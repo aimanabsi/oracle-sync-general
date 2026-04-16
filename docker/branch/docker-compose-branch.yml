@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # Kafka Broker for Branch (Lightweight)
+  kafka-branch:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka-branch
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-branch:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 72
+      KAFKA_LOG_SEGMENT_BYTES: 536870912
+      KAFKA_LOG_CLEANUP_POLICY: delete
+      CLUSTER_ID: MkQrr1dJ0SnJ5ZrF3kLsqQ
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 2
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 2@kafka-branch:29093
+      KAFKA_LISTENERS: PLAINTEXT://kafka-branch:29092,CONTROLLER://kafka-branch:29093,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+    volumes:
+      - kafka-branch-data:/var/lib/kafka/data
+    networks:
+      - oracle-sync-branch
+    restart: unless-stopped
+
+  # Kafka Connect for Branch CDC
+  kafka-connect-branch:
+    image: confluentinc/cp-kafka-connect:7.5.0
+    container_name: kafka-connect-branch
+    ports:
+      - "8083:8083"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka-branch:29092
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect-branch
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: connect-branch
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-configs-branch
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets-branch
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: connect-status-branch
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "true"
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "true"
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+      CONNECT_LOG4J_LOGGERS: org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR
+      CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components
+    depends_on:
+      - kafka-branch
+    volumes:
+      - ./debezium-connector-oracle:/usr/share/confluent-hub-components/debezium-connector-oracle
+      - ./debezium-connector-jdbc:/usr/share/confluent-hub-components/debezium-connector-jdbc
+    networks:
+      - oracle-sync-branch
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/connectors"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MirrorMaker2 for Branch-to-Hub and Hub-to-Branch Replication
+  mirrormaker2:
+    build:
+      context: ./mirrormaker
+      dockerfile: Dockerfile
+    container_name: mirrormaker2-branch
+    environment:
+      KAFKA_HUB_BOOTSTRAP_SERVERS: ${KAFKA_HUB_BOOTSTRAP_SERVERS}
+      KAFKA_BRANCH_BOOTSTRAP_SERVERS: kafka-branch:29092
+      MM2_CLUSTERS: hub,branch
+      MM2_HUB_BOOTSTRAP_SERVERS: ${KAFKA_HUB_BOOTSTRAP_SERVERS}
+      MM2_BRANCH_BOOTSTRAP_SERVERS: kafka-branch:29092
+      LOG_LEVEL: INFO
+    depends_on:
+      - kafka-branch
+    networks:
+      - oracle-sync-branch
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "ps", "aux"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  kafka-branch-data:
+
+networks:
+  oracle-sync-branch:
+    driver: bridge
