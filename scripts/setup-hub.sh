@@ -65,14 +65,15 @@ echo -e "${GREEN}✓ Supplemental logging enabled${NC}"
 # 4. Start Docker services
 echo -e "${YELLOW}Starting Docker services...${NC}"
 cd "$DOCKER_DIR"
-docker-compose -f docker-compose-hub.yml up -d
+docker compose --env-file "$PROJECT_DIR/.env" -f docker-compose-hub.yml up -d
+
 
 # Wait for services to start
 echo -e "${YELLOW}Waiting for services to start...${NC}"
 sleep 45 # Increased sleep time for more services
 
 # Check if services are running
-docker-compose -f docker-compose-hub.yml ps
+docker compose -f docker-compose-hub.yml ps
 
 # 5. Register Debezium connectors
 echo -e "${YELLOW}Registering Debezium connectors...${NC}"
