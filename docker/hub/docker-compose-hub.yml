@@ -179,3 +179,22 @@ volumes:
 networks:
   oracle-sync-hub:
     driver: bridge
+
+  # Kafka UI
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui-hub
+    ports:
+      - "8180:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: HubCluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-hub:29092
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: HubConnect
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect-hub:8083
+    depends_on:
+      - kafka-hub
+      - schema-registry
+      - kafka-connect-hub
+    networks:
+      - oracle-sync-hub

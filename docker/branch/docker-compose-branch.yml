@@ -125,3 +125,22 @@ volumes:
 networks:
   oracle-sync-branch:
     driver: bridge
+
+  # Kafka UI for Branch
+  kafka-ui-branch:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui-branch
+    ports:
+      - "8180:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: BranchCluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-branch:29092
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry-branch:8081
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: BranchConnect
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect-branch:8083
+    depends_on:
+      - kafka-branch
+      - schema-registry-branch
+      - kafka-connect-branch
+    networks:
+      - oracle-sync-branch

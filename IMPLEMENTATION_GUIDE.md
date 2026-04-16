@@ -19,6 +19,7 @@ This document provides a comprehensive implementation guide for setting up a bid
    - [Monitoring API](#monitoring-api)
    - [Monitoring Dashboard](#monitoring-dashboard)
    - [SystemD Services](#systemd-services)
+   - [Kafka UI](#kafka-ui)
 8. [Troubleshooting](#8-troubleshooting)
 9. [References](#9-references)
 
@@ -36,7 +37,7 @@ This project aims to establish a robust and scalable solution for synchronizing 
 
 The system employs a **hub-and-spoke topology**:
 
--   **Hub**: A central, always-online Oracle 19c database. It hosts the primary data and acts as the central point for all synchronization. Associated with the Hub are Kafka, Kafka Connect (with Debezium), Schema Registry, Conflict Resolver, Monitoring API, Prometheus, and Grafana.
+-   **Hub**: A central, always-online Oracle 19c database. It hosts the primary data and acts as the central point for all synchronization. Associated with the Hub are Kafka, Kafka Connect (with Debezium), Schema Registry, Conflict Resolver, Monitoring API, Prometheus, Grafana, and Kafka UI.
 -   **Branches**: Multiple remote Oracle 19c databases with potentially intermittent connectivity. Each branch has its own Kafka, Kafka Connect (with Debezium), Schema Registry, and MirrorMaker2 instances.
 
 **Data Flow:**
@@ -168,7 +169,7 @@ Before you begin, ensure you have the following installed and configured:
     ```bash
     ./scripts/health-check.sh
     ```
-    You should see all Hub services reported as healthy.
+    You should see all Hub services reported as healthy. You can access Kafka UI for the Hub at `http://localhost:8180`.
 
 ### Branch Setup
 
@@ -193,7 +194,7 @@ Repeat these steps for each branch server you want to set up.
     ```bash
     ./scripts/health-check.sh
     ```
-    You should see all Branch services reported as healthy.
+    You should see all Branch services reported as healthy. You can access Kafka UI for the Branch at `http://localhost:8180`.
 
 ## 7. Detailed Component Guides
 
@@ -254,6 +255,13 @@ SystemD service files are provided in the `systemd/` directory to manage the Doc
 
 -   **Installation**: Copy the relevant `.service` files to `/etc/systemd/system/` on your Linux server.
 -   **Enable and Start**: Use `sudo systemctl enable <service-name>` and `sudo systemctl start <service-name>` to manage the services.
+
+### Kafka UI
+
+Kafka UI is a web-based user interface for managing and monitoring Apache Kafka clusters. It provides a user-friendly way to inspect topics, view messages, manage consumers, and monitor Kafka Connect instances.
+
+-   **Access**: Kafka UI for both Hub and Branch environments will be accessible at `http://localhost:8180` after the Docker services are started.
+-   **Features**: Provides insights into Kafka topics, partitions, consumer groups, and allows for basic message browsing and production.
 
 ## 8. Troubleshooting
 

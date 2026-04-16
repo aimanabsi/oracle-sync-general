@@ -38,10 +38,12 @@ check_service "Conflict Resolver" "http://localhost:8080/actuator/health" "200" 
 check_service "Monitoring API" "http://localhost:8088/actuator/health" "200" "Health endpoint reachable"
 check_service "Prometheus" "http://localhost:9090/graph" "200" "Prometheus UI reachable"
 check_service "Grafana" "http://localhost:3000/login" "200" "Grafana login page reachable"
+check_service "Kafka UI Hub" "http://localhost:8180" "200" "Kafka UI reachable"
 
 # Check Branch Services (assuming a branch is running on localhost for testing)
 echo -e "\n${YELLOW}--- Checking Branch Services (assuming local branch) ---${NC}"
 check_service "Kafka Connect Branch" "http://localhost:8084/connectors" "200" "Connectors API reachable"
 check_service "Schema Registry Branch" "http://localhost:8082/subjects" "200" "Subjects API reachable"
+check_service "Kafka UI Branch" "http://localhost:8180" "200" "Kafka UI reachable"
 
 echo -e "\n${GREEN}All essential services are healthy!${NC}"
