@@ -6,10 +6,10 @@
 set -e
 
 # Color codes for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+RED=\'\\033[0;31m\'
+GREEN=\'\\033[0;32m\'
+YELLOW=\'\\033[1;33m\'
+NC=\'\\033[0m\'
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -88,7 +88,7 @@ echo -e "${YELLOW}Registering Debezium connectors...${NC}"
 # Wait for Kafka Connect to be ready
 echo "Waiting for Kafka Connect to be ready..."
 for i in {1..30}; do
-    if curl -s http://localhost:8083/connectors > /dev/null 2>&1; then
+    if curl -s http://localhost:8084/connectors > /dev/null 2>&1; then
         echo -e "${GREEN}✓ Kafka Connect is ready${NC}"
         break
     fi
@@ -98,7 +98,7 @@ done
 
 # Register Oracle Source Connector
 echo "Registering oracle-source-branch connector..."
-curl -X POST http://localhost:8083/connectors \
+curl -X POST http://localhost:8084/connectors \
   -H "Content-Type: application/json" \
   -d @"$CONNECTORS_DIR/oracle-source-branch.json" || {
     echo -e "${RED}✗ Failed to register oracle-source-branch connector${NC}"
@@ -107,7 +107,7 @@ echo -e "${GREEN}✓ oracle-source-branch connector registered${NC}"
 
 # Register Oracle Sink Connector
 echo "Registering oracle-sink-branch connector..."
-curl -X POST http://localhost:8083/connectors \
+curl -X POST http://localhost:8084/connectors \
   -H "Content-Type: application/json" \
   -d @"$CONNECTORS_DIR/oracle-sink-branch.json" || {
     echo -e "${RED}✗ Failed to register oracle-sink-branch connector${NC}"
@@ -123,13 +123,18 @@ docker exec kafka-branch kafka-topics --bootstrap-server localhost:9092 --list
 
 # Check Debezium connectors
 echo "Checking Debezium connectors..."
-curl -s http://localhost:8083/connectors | jq '.'
+curl -s http://localhost:8084/connectors | jq "."
+
+# Check Schema Registry
+echo "Checking Schema Registry..."
+curl -s http://localhost:8082/subjects || echo -e "${RED}✗ Schema Registry not reachable${NC}"
 
 echo -e "${GREEN}✓ Branch Server Setup Complete!${NC}"
 echo ""
 echo "Branch Services:"
 echo "  - Kafka: localhost:9092"
-echo "  - Kafka Connect: http://localhost:8083"
+echo "  - Kafka Connect: http://localhost:8084"
+echo "  - Schema Registry: http://localhost:8082"
 echo "  - MirrorMaker2: Running in background"
 echo ""
 echo "Next steps:"

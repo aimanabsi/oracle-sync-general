@@ -1,4 +1,4 @@
--- Create Debezium Sync User on Hub Server
+-- Create Debezium Sync User on Branch Server
 -- Run as SYSDBA
 
 -- Connect to PDB

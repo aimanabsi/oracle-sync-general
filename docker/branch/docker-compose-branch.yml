@@ -33,12 +33,32 @@ services:
       - oracle-sync-branch
     restart: unless-stopped
 
+  # Confluent Schema Registry for Branch
+  schema-registry-branch:
+    image: confluentinc/cp-schema-registry:7.6.0
+    container_name: schema-registry-branch
+    ports:
+      - "8082:8081" # Different port to avoid conflict if running on same host as hub
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry-branch
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka-branch:29092
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    depends_on:
+      - kafka-branch
+    networks:
+      - oracle-sync-branch
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/subjects"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Kafka Connect for Branch CDC
   kafka-connect-branch:
-    image: confluentinc/cp-kafka-connect:7.5.0
+    image: quay.io/debezium/connect:3.5.0.Final
     container_name: kafka-connect-branch
     ports:
-      - "8083:8083"
+      - "8084:8083" # Different port to avoid conflict if running on same host as hub
     environment:
       CONNECT_BOOTSTRAP_SERVERS: kafka-branch:29092
       CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect-branch
@@ -58,12 +78,13 @@ services:
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
       CONNECT_LOG4J_LOGGERS: org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR
-      CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components
+      CONNECT_PLUGIN_PATH: /kafka/connect
     depends_on:
       - kafka-branch
+      - schema-registry-branch
     volumes:
-      - ./debezium-connector-oracle:/usr/share/confluent-hub-components/debezium-connector-oracle
-      - ./debezium-connector-jdbc:/usr/share/confluent-hub-components/debezium-connector-jdbc
+      - ./debezium-connector-oracle:/kafka/connect/debezium-connector-oracle
+      - ./debezium-connector-jdbc:/kafka/connect/debezium-connector-jdbc
     networks:
       - oracle-sync-branch
     restart: unless-stopped
@@ -88,6 +109,7 @@ services:
       LOG_LEVEL: INFO
     depends_on:
       - kafka-branch
+      - schema-registry-branch
     networks:
       - oracle-sync-branch
     restart: unless-stopped

@@ -1,0 +1,14 @@
+[Unit]
+Description=Kafka Connect Branch
+After=kafka-branch.service
+
+[Service]
+User=ubuntu
+Group=ubuntu
+ExecStart=/usr/bin/docker-compose -f /home/ubuntu/oracle-sync-project/docker/branch/docker-compose-branch.yml up kafka-connect-branch
+ExecStop=/usr/bin/docker-compose -f /home/ubuntu/oracle-sync-project/docker/branch/docker-compose-branch.yml stop kafka-connect-branch
+WorkingDirectory=/home/ubuntu/oracle-sync-project/docker/branch
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

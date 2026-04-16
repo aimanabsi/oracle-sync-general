@@ -1,0 +1,14 @@
+[Unit]
+Description=Schema Registry Hub
+After=kafka-hub.service
+
+[Service]
+User=ubuntu
+Group=ubuntu
+ExecStart=/usr/bin/docker-compose -f /home/ubuntu/oracle-sync-project/docker/hub/docker-compose-hub.yml up schema-registry
+ExecStop=/usr/bin/docker-compose -f /home/ubuntu/oracle-sync-project/docker/hub/docker-compose-hub.yml stop schema-registry
+WorkingDirectory=/home/ubuntu/oracle-sync-project/docker/hub
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

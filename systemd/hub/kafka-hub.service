@@ -1,0 +1,14 @@
+[Unit]
+Description=Kafka Hub Broker
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+ExecStart=/usr/bin/docker-compose -f /home/ubuntu/oracle-sync-project/docker/hub/docker-compose-hub.yml up kafka-hub
+ExecStop=/usr/bin/docker-compose -f /home/ubuntu/oracle-sync-project/docker/hub/docker-compose-hub.yml stop kafka-hub
+WorkingDirectory=/home/ubuntu/oracle-sync-project/docker/hub
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

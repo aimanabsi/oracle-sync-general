@@ -1,0 +1,14 @@
+[Unit]
+Description=Conflict Resolver Service
+After=kafka-connect-hub.service
+
+[Service]
+User=ubuntu
+Group=ubuntu
+ExecStart=/usr/bin/docker-compose -f /home/ubuntu/oracle-sync-project/docker/hub/docker-compose-hub.yml up conflict-resolver
+ExecStop=/usr/bin/docker-compose -f /home/ubuntu/oracle-sync-project/docker/hub/docker-compose-hub.yml stop conflict-resolver
+WorkingDirectory=/home/ubuntu/oracle-sync-project/docker/hub
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

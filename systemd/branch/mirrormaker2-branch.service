@@ -1,0 +1,14 @@
+[Unit]
+Description=MirrorMaker2 Branch
+After=kafka-connect-branch.service
+
+[Service]
+User=ubuntu
+Group=ubuntu
+ExecStart=/usr/bin/docker-compose -f /home/ubuntu/oracle-sync-project/docker/branch/docker-compose-branch.yml up mirrormaker2
+ExecStop=/usr/bin/docker-compose -f /home/ubuntu/oracle-sync-project/docker/branch/docker-compose-branch.yml stop mirrormaker2
+WorkingDirectory=/home/ubuntu/oracle-sync-project/docker/branch
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

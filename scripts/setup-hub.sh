@@ -6,10 +6,10 @@
 set -e
 
 # Color codes for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+RED=\'\\033[0;31m\'
+GREEN=\'\\033[0;32m\'
+YELLOW=\'\\033[1;33m\'
+NC=\'\\033[0m\' # No Color
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -69,7 +69,7 @@ docker-compose -f docker-compose-hub.yml up -d
 
 # Wait for services to start
 echo -e "${YELLOW}Waiting for services to start...${NC}"
-sleep 30
+sleep 45 # Increased sleep time for more services
 
 # Check if services are running
 docker-compose -f docker-compose-hub.yml ps
@@ -79,12 +79,12 @@ echo -e "${YELLOW}Registering Debezium connectors...${NC}"
 
 # Wait for Kafka Connect to be ready
 echo "Waiting for Kafka Connect to be ready..."
-for i in {1..30}; do
+for i in {1..45}; do # Increased attempts
     if curl -s http://localhost:8083/connectors > /dev/null 2>&1; then
         echo -e "${GREEN}✓ Kafka Connect is ready${NC}"
         break
     fi
-    echo "Attempt $i/30: Waiting for Kafka Connect..."
+    echo "Attempt $i/45: Waiting for Kafka Connect..."
     sleep 2
 done
 
@@ -115,14 +115,24 @@ docker exec kafka-hub kafka-topics --bootstrap-server localhost:9092 --list
 
 # Check Debezium connectors
 echo "Checking Debezium connectors..."
-curl -s http://localhost:8083/connectors | jq '.'
+curl -s http://localhost:8083/connectors | jq "."
+
+# Check Schema Registry
+echo "Checking Schema Registry..."
+curl -s http://localhost:8081/subjects || echo -e "${RED}✗ Schema Registry not reachable${NC}"
+
+# Check Monitoring API
+echo "Checking Monitoring API..."
+curl -s http://localhost:8088/actuator/health || echo -e "${RED}✗ Monitoring API not reachable${NC}"
 
 echo -e "${GREEN}✓ Hub Server Setup Complete!${NC}"
 echo ""
 echo "Hub Services:"
 echo "  - Kafka: localhost:9092"
 echo "  - Kafka Connect: http://localhost:8083"
+echo "  - Schema Registry: http://localhost:8081"
 echo "  - Conflict Resolver: http://localhost:8080"
+echo "  - Monitoring API: http://localhost:8088"
 echo "  - Prometheus: http://localhost:9090"
 echo "  - Grafana: http://localhost:3000 (admin/admin)"
 echo ""
