@@ -3,7 +3,7 @@
   "config": {
     "connector.class": "io.debezium.connector.jdbc.JdbcSinkConnector",
     "connection.url": "jdbc:oracle:thin:@${ORACLE_BRANCH_HOST}:${ORACLE_BRANCH_PORT}:${ORACLE_BRANCH_PDB}",
-    "connection.user": "${ORACLE_BRANCH_SYNC_USER}",
+    "connection.user": "SYNC_WRITER",
     "connection.password": "${ORACLE_BRANCH_SYNC_PASSWORD}",
     "connection.attempts": 3,
     "connection.backoff.ms": 10000,

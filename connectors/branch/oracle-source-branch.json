@@ -4,7 +4,7 @@
     "connector.class": "io.debezium.connector.oracle.OracleConnector",
     "database.hostname": "${ORACLE_BRANCH_HOST}",
     "database.port": "${ORACLE_BRANCH_PORT}",
-    "database.user": "${ORACLE_BRANCH_SYNC_USER}",
+    "database.user": "C##DBZUSER",
     "database.password": "${ORACLE_BRANCH_SYNC_PASSWORD}",
     "database.dbname": "${ORACLE_BRANCH_CDB}",
     "database.pdb.name": "${ORACLE_BRANCH_PDB}",

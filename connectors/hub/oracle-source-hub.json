@@ -4,7 +4,7 @@
     "connector.class": "io.debezium.connector.oracle.OracleConnector",
     "database.hostname": "${ORACLE_HUB_HOST}",
     "database.port": "${ORACLE_HUB_PORT}",
-    "database.user": "${ORACLE_HUB_SYNC_USER}",
+    "database.user": "C##DBZUSER",
     "database.password": "${ORACLE_HUB_SYNC_PASSWORD}",
     "database.dbname": "${ORACLE_HUB_PDB}",
     "database.pdb.name": "${ORACLE_HUB_PDB}",

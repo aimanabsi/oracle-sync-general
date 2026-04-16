@@ -36,7 +36,7 @@ sqlplus -v > /dev/null 2>&1 || {
 }
 
 # 3. Run Oracle setup scripts
-echo -e "${YELLOW}Running Oracle setup scripts on branch...${NC}"
+echo -e "${YELLOW}Running Oracle setup scripts...${NC}"
 
 # Enable LogMiner
 echo "Executing 01-enable-logminer.sql..."
@@ -63,12 +63,7 @@ sqlplus sys/"${ORACLE_BRANCH_SYS_PASSWORD}"@//"${ORACLE_BRANCH_HOST}":"${ORACLE_
 echo -e "${GREEN}✓ Supplemental logging enabled${NC}"
 
 # Add conflict metadata columns
-echo "Executing 04-conflict-columns.sql..."
-sqlplus sys/"${ORACLE_BRANCH_SYS_PASSWORD}"@//"${ORACLE_BRANCH_HOST}":"${ORACLE_BRANCH_PORT}"/"${ORACLE_BRANCH_PDB}" as sysdba @"$SCRIPT_DIR/oracle/branch/04-conflict-columns.sql" || {
-    echo -e "${RED}✗ Failed to add conflict columns${NC}"
-    exit 1
-}
-echo -e "${GREEN}✓ Conflict metadata columns added${NC}"
+
 
 # 4. Start Docker services
 echo -e "${YELLOW}Starting Docker services...${NC}"

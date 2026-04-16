@@ -52,7 +52,7 @@ sqlplus sys/"${ORACLE_HUB_SYS_PASSWORD}"@//"${ORACLE_HUB_HOST}":"${ORACLE_HUB_PO
     echo -e "${RED}✗ Failed to create sync user${NC}"
     exit 1
 }
-echo -e "${GREEN}✓ Sync user created${NC}"
+echo -e "${GREEN}✓ Sync users created${NC}"
 
 # Enable supplemental logging
 echo "Executing 03-supplemental-logging.sql..."
@@ -138,5 +138,5 @@ echo "  - Grafana: http://localhost:3000 (admin/admin)"
 echo ""
 echo "Next steps:"
 echo "  1. Setup branch servers using ./scripts/setup-branch.sh"
-echo "  2. Monitor sync progress in Grafana"
-echo "  3. Check logs: docker logs <container-name>"
+2. Monitor sync progress in Grafana"
+3. Check logs: docker logs <container-name>"
